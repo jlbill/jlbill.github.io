@@ -1,0 +1,119 @@
+/* style.css */
+body {
+    font-family: "Georgia", "Times New Roman", serif;
+    color: #333;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #fdfdfd; /* Very subtle off-white */
+}
+
+/* Navigation */
+header {
+    text-align: center;
+    padding: 40px 20px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 60px;
+}
+
+header h1 {
+    font-weight: normal;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 1.2rem;
+    margin: 0 0 15px 0;
+}
+
+nav a {
+    text-decoration: none;
+    color: #888;
+    margin: 0 15px;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+nav a:hover {
+    color: #000;
+}
+
+/* Layout Containers */
+.content-column {
+    max-width: 680px; /* Narrow column for reading like the inspiration site */
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.wide-image-container {
+    width: 100%;
+    max-width: 1200px; /* Wider than text, but not full screen */
+    margin: 60px auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* Typography */
+h2 {
+    font-weight: normal;
+    font-size: 1.8rem;
+    margin-top: 40px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+p {
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+
+/* Images */
+img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.caption {
+    text-align: center;
+    font-style: italic;
+    color: #777;
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+/* Gallery Grid for the homepage */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.grid-item {
+    text-decoration: none;
+    color: #333;
+}
+
+.grid-item img {
+    transition: opacity 0.2s;
+}
+
+.grid-item:hover img {
+    opacity: 0.8;
+}
+
+.grid-title {
+    margin-top: 10px;
+    font-size: 1rem;
+    text-align: center;
+    display: block;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    margin-top: 100px;
+    padding: 40px;
+    color: #999;
+    font-size: 0.8rem;
+    border-top: 1px solid #eee;
+}
