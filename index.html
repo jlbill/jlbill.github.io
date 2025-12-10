@@ -9,17 +9,21 @@
     <style>
         /* PAGE BACKGROUND & TEXT */
         body {
-            /* Light Neutral Gray */
+            /* Light Neutral Gray background */
             background-color: #f4f4f4; 
             color: #333;
             margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            /* NOTE: Removed global font-family setting to restore original serif look */
         }
 
         /* HEADER STYLES */
         header {
-            text-align: center;
-            padding: 40px 20px;
+            /* Removed text-align: center to restore left alignment */
+            padding: 20px;
+        }
+        
+        h1 {
+            margin-top: 0;
         }
 
         /* GRID LAYOUT */
@@ -39,9 +43,10 @@
             border-radius: 8px;
             text-decoration: none;
             background-color: #ddd; /* Placeholder color while loading */
-            
             /* THIS MAKES IT A PERFECT SQUARE */
-            aspect-ratio: 1 / 1; 
+            aspect-ratio: 1 / 1;
+            /* Ensure font inside grids is sans-serif for readability against images */
+             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         /* THE IMAGE - CENTER CROP */
@@ -96,6 +101,8 @@
         
         /* SECTION HEADERS */
         h2 {
+            /* Keep section headers sans-serif for clean look */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             text-align: center;
             margin-bottom: 20px;
             text-transform: uppercase;
@@ -111,6 +118,23 @@
             text-align: center; 
             margin-bottom: 30px;
         }
+
+        /* SUBTITLE FONT */
+        .subtitle {
+             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+             text-align: center; 
+             font-style: italic; 
+             margin-bottom: 60px; 
+             color: #666;
+        }
+        
+        footer {
+             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+             margin-top: 50px; 
+             padding-bottom: 40px; 
+             text-align: center; 
+             color: #888;
+        }
     </style>
 </head>
 <body>
@@ -120,7 +144,7 @@
     </header>
 
     <div class="content-column">
-        <p style="text-align: center; font-style: italic; margin-bottom: 60px; color: #666;">
+        <p class="subtitle">
             A collection of photos & thoughts
         </p>
 
@@ -141,21 +165,17 @@
         </div>
 
         <div class="section-header-container">
-            <h2 id="objects">Objects (WIP)</h2>
+            <h2 id="objects">Objects</h2>
         </div>
 
         <div class="grid">
             <a href="#" class="grid-item" style="cursor: default;">
-                <img src="images/WIP.png" alt="Nano Banana Work In Progress Graphic">
-                <span class="grid-title">
-                    Coming soon<br>
-                    <span style="font-size: 1rem; font-weight: normal; opacity: 0.9;">Work in Progress</span>
-                </span>
-            </a>
+                <img src="images/WIP.png" alt="Work In Progress">
+                </a>
         </div>
     </div>
 
-    <footer style="margin-top: 50px; padding-bottom: 40px; text-align: center; color: #888;">
+    <footer>
         &copy; 2025 John Bill. All images subject to copyright.
     </footer>
 
