@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Korea '25</title>
+    <title>Korea '25'</title>
     <link rel="stylesheet" href="style.css">
     
     <style>
+        /* MAIN PAGE STYLES */
         .wide-image-container {
             display: flex;
             flex-direction: column;
@@ -19,8 +20,12 @@
             max-height: 95vh; 
             width: auto; 
             object-fit: contain;
-            /* This shows the user they can click */
-            cursor: zoom-in; 
+            cursor: zoom-in; /* Shows magnifying glass cursor */
+            transition: opacity 0.2s;
+        }
+
+        .wide-image-container img:hover {
+            opacity: 0.9;
         }
         
         .caption {
@@ -29,12 +34,52 @@
             color: #666;
             text-align: center;
         }
+
+        /* NEW LIGHTBOX VIEWER STYLES */
+        #zoom-overlay {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9); /* Dark background */
+            z-index: 1000;
+            overflow: hidden;
+            cursor: move; /* Shows 'move' cursor when open */
+        }
+
+        #zoom-image-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #zoom-image {
+            max-width: 90%;
+            max-height: 90%;
+            /* Will be controlled by JS for zooming */
+        }
+
+        #close-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            font-family: sans-serif;
+            cursor: pointer;
+            z-index: 1001;
+            user-select: none;
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <h1><a href="index.html" style="color:inherit; text-decoration:none;">JB Photography</a></h1>
+        <h1><a href="index.html" style="color:inherit; text-decoration:none;">JB Photo</a></h1>
         <nav>
             <a href="index.html#travel">Locations</a>
             <a href="index.html#gear">Objects (WIP)</a>
@@ -52,41 +97,41 @@
     </div>
 
     <div class="wide-image-container">
-        <img src="images/Gyeongbukgong-1.jpg" alt="Palace Guards">
+        <img src="images/Gyeongbukgong-1.jpg" alt="Palace Guards" class="zoomable">
         <div class="caption">Sets of 3 drumbeats signal the changing of the guard at Gyeongbukgong palace.</div>
     </div>
 
     <div class="wide-image-container">
-        <img src="images/Gyeongbukgong-2.jpg" alt="Palace Architecture">
+        <img src="images/Gyeongbukgong-2.jpg" alt="Palace Architecture" class="zoomable">
         <div class="caption">The palace is full of peaceful spaces no matter how busy it is.</div>
     </div>
     
     <div class="wide-image-container">
-        <img src="images/Wall-1.jpg" alt="Art Wall">
+        <img src="images/Wall-1.jpg" alt="Art Wall" class="zoomable">
     </div>
     
     <div class="wide-image-container">
-        <img src="images/Wall-2.jpg" alt="Art Wall Detail">
+        <img src="images/Wall-2.jpg" alt="Art Wall Detail" class="zoomable">
         <div class="caption">An art park at the bottom of Insadong culture street had mini walls designed by different artists.</div>
     </div>
     
     <div class="wide-image-container">
-        <img src="images/Bukhansan-1.jpg" alt="Mountain with two crows">
+        <img src="images/Bukhansan-1.jpg" alt="Mountain with two crows" class="zoomable">
         <div class="caption">View of Bukhansan peak on the way up.</div>
     </div>
 
     <div class="wide-image-container">
-        <img src="images/Bukhansan-2.jpg" alt="Black and white mountain with man on summit">
+        <img src="images/Bukhansan-2.jpg" alt="Black and white mountain with man on summit" class="zoomable">
         <div class="caption">Bukhansan peak with 2 crows hunting for snacks dropped by hikers.</div>
     </div>
 
     <div class="wide-image-container">
-        <img src="images/Jeju-2.jpg" alt="Jeju Coast Sunset">
+        <img src="images/Jeju-2.jpg" alt="Jeju Coast Sunset" class="zoomable">
         <div class="caption">Jeju's southern coast at sunset.</div>
     </div>
     
     <div class="wide-image-container">
-        <img src="images/Jeju-3.jpg" alt="Island view from coast">
+        <img src="images/Jeju-3.jpg" alt="Island view from coast" class="zoomable">
         <div class="caption">Small island with cool rock pillars from a rocky Jeju beach.</div>
     </div>
     
@@ -94,12 +139,65 @@
         <a href="index.html">Return Home</a>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.6/dist/medium-zoom.min.js"></script>
+    <div id="zoom-overlay">
+        <div id="close-btn">&times;</div>
+        <div id="zoom-image-container">
+            <img id="zoom-image" src="" alt="Zoomed View">
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
     <script>
-        // This finds all images inside .wide-image-container and makes them zoomable
-        mediumZoom('.wide-image-container img', {
-            margin: 24, /* Leaves a little space around the edge */
-            background: '#ffffff' /* The background color when zoomed (white) */
+        // Select elements
+        const overlay = document.getElementById('zoom-overlay');
+        const zoomImg = document.getElementById('zoom-image');
+        const closeBtn = document.getElementById('close-btn');
+        const images = document.querySelectorAll('.zoomable');
+        
+        let pzInstance = null; // Store the panzoom instance
+
+        // 1. Initialize Panzoom on the overlay image (but don't enable it yet)
+        // We set maxScale to 10 so you can zoom in 10x deep!
+        pzInstance = Panzoom(zoomImg, {
+            maxScale: 10,
+            contain: 'outside',
+            cursor: 'move'
+        });
+
+        // 2. Add Click Events to all page images
+        images.forEach(img => {
+            img.addEventListener('click', () => {
+                // Set the overlay image source to the clicked image source
+                zoomImg.src = img.src;
+                // Show the overlay
+                overlay.style.display = 'block';
+                // Reset zoom to normal before showing
+                pzInstance.reset();
+            });
+        });
+
+        // 3. Enable Mouse Wheel Zooming
+        zoomImg.parentElement.addEventListener('wheel', pzInstance.zoomWithWheel);
+
+        // 4. Close Overlay Function
+        function closeOverlay() {
+            overlay.style.display = 'none';
+            zoomImg.src = ""; // Clear src to save memory
+        }
+
+        // Close when clicking the "X"
+        closeBtn.addEventListener('click', closeOverlay);
+
+        // Close when pressing "Escape" key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Escape") closeOverlay();
+        });
+        
+        // Optional: Close if clicking the black background (but not if dragging the image)
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay || e.target.id === 'zoom-image-container') {
+                closeOverlay();
+            }
         });
     </script>
 
