@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Korea '25</title>
-    <link rel="stylesheet" href="style.css">
     
     <style>
+        /* RESET & BASICS */
+        body { margin: 0; padding: 0; font-family: sans-serif; }
+
         /* MAIN PAGE STYLES */
         .wide-image-container {
             display: flex;
@@ -45,12 +47,12 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.95);
             z-index: 1000;
-            cursor: move;
         }
 
         #zoom-image-container {
             width: 100%;
             height: 100%;
+            /* Flex ensures the image is visually centered initially */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -58,17 +60,11 @@
         }
 
         #zoom-image {
-            /* Fix 1: Ensure image fits screen initially */
             max-width: 100%;
             max-height: 100%;
-            width: auto;
-            height: auto;
             object-fit: contain; 
-            
-            /* Fix 2: Force zoom to happen from CENTER, not top-left */
+            /* This ensures the browser starts it in the center */
             transform-origin: center center;
-            
-            /* Performance */
             will-change: transform; 
         }
 
@@ -88,22 +84,22 @@
 </head>
 <body>
 
-    <header>
+    <header style="padding: 20px; text-align: center;">
         <h1><a href="index.html" style="color:inherit; text-decoration:none;">JB Photo</a></h1>
         <nav>
-            <a href="index.html#travel">Locations</a>
-            <a href="index.html#gear">Objects (WIP)</a>
+            <a href="#" style="margin: 0 10px;">Locations</a>
+            <a href="#" style="margin: 0 10px;">Objects (WIP)</a>
         </nav>
     </header>
 
-    <div class="content-column" style="text-align: center;">
+    <div class="content-column" style="text-align: center; max-width: 800px; margin: 0 auto;">
         <h2 style="border: none; margin-bottom: 20px;">South Korea</h2>
         
         <p style="font-size: 1.2rem; color: #555;">
             Highlights from a Fall '25 trip to Seoul and Jeju. All shot on Fujifilm GFX100RF
         </p>
 
-        <hr style="width: 50px; border: 1px solid #ccc; margin-top: 30px;">
+        <hr style="width: 50px; border: 1px solid #ccc; margin-top: 30px; margin-bottom: 30px;">
     </div>
 
     <div class="wide-image-container">
@@ -154,7 +150,7 @@
         <div class="caption">Small island with cool rock pillars from a rocky Jeju beach.</div>
     </div>
     
-    <footer>
+    <footer style="text-align: center; padding: 40px;">
         <a href="index.html">Return Home</a>
     </footer>
 
@@ -169,64 +165,39 @@
     <script>
         const overlay = document.getElementById('zoom-overlay');
         const zoomImg = document.getElementById('zoom-image');
+        const zoomContainer = document.getElementById('zoom-image-container');
         const closeBtn = document.getElementById('close-btn');
         const images = document.querySelectorAll('.zoomable');
         
-        // Initialize Panzoom
-        // We set startScale: 1 explicitly to match the CSS "fit" state
+        // 1. Initialize Panzoom
+        // FIXED: Removed "contain: outside" which was causing the snap-to-left issue
         const pzInstance = Panzoom(zoomImg, {
             maxScale: 10,
             minScale: 1, 
-            contain: 'outside',
             startScale: 1, 
-            cursor: 'move'
+            cursor: 'move',
+            step: 0.3, // Makes mouse wheel zooming smoother
         });
 
-        // 2. Add Click Events
+        // 2. Add Click Events to thumbnails
         images.forEach(img => {
             img.addEventListener('click', () => {
-                // 1. Reset everything first to avoid "ghost" images
-                zoomImg.src = "";
+                // Prepare overlay
                 zoomImg.style.opacity = "0"; 
-                pzInstance.reset(); // Crucial: Reset zoom to 1 before showing
-
-                // 2. Open Overlay
+                zoomImg.src = ""; // clear previous
                 overlay.style.display = 'block';
                 
-                // 3. Set new Source
+                // Set new Source
                 zoomImg.src = img.src;
                 
-                // 4. WAIT for load before calculating center
+                // Wait for image to actually load so we know dimensions
                 zoomImg.onload = () => {
-                    // This forces the library to recalculate the "center" based on the new image size
-                    pzInstance.reset(); 
+                    // Reset Panzoom to center (scale 1, x:0, y:0)
+                    pzInstance.reset({ animate: false });
                     zoomImg.style.opacity = "1";
                 }
             });
         });
 
-        // Enable Mouse Wheel
-        zoomImg.parentElement.addEventListener('wheel', pzInstance.zoomWithWheel);
-
-        // Close Functions
-        function closeOverlay() {
-            overlay.style.display = 'none';
-            zoomImg.src = ""; 
-            pzInstance.reset(); // Reset on close so next time starts fresh
-        }
-
-        closeBtn.addEventListener('click', closeOverlay);
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === "Escape") closeOverlay();
-        });
-        
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay || e.target.id === 'zoom-image-container') {
-                closeOverlay();
-            }
-        });
-    </script>
-
-</body>
-</html>
+        // 3. Enable Mouse Wheel
+        // We bind this
