@@ -54,20 +54,22 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden; /* Ensures image doesn't bleed out during zoom */
+            overflow: hidden; 
         }
 
         #zoom-image {
-            /* This ensures the image starts "Fitted" to the screen */
+            /* Fix 1: Ensure image fits screen initially */
             max-width: 100%;
             max-height: 100%;
             width: auto;
             height: auto;
             object-fit: contain; 
             
-            /* Smoothness settings */
-            will-change: transform; 
+            /* Fix 2: Force zoom to happen from CENTER, not top-left */
             transform-origin: center center;
+            
+            /* Performance */
+            will-change: transform; 
         }
 
         #close-btn {
@@ -115,6 +117,15 @@
     </div>
     
     <div class="wide-image-container">
+        <img src="images/SNF-1.jpg" alt="Art Wall" class="zoomable" loading="lazy">
+    </div>
+    
+    <div class="wide-image-container">
+        <img src="images/SNF-2.jpg" alt="Art Wall Detail" class="zoomable" loading="lazy">
+        <div class="caption">Seoul National Forest had excellent Fall vibes.</div>
+    </div>
+
+    <div class="wide-image-container">
         <img src="images/Wall-1.jpg" alt="Art Wall" class="zoomable" loading="lazy">
     </div>
     
@@ -161,45 +172,47 @@
         const closeBtn = document.getElementById('close-btn');
         const images = document.querySelectorAll('.zoomable');
         
-        // 1. Initialize Panzoom
-        // We do NOT set startScale here, we let CSS handle the initial size
+        // Initialize Panzoom
+        // We set startScale: 1 explicitly to match the CSS "fit" state
         const pzInstance = Panzoom(zoomImg, {
             maxScale: 10,
-            minScale: 1, // Prevents zooming out smaller than the screen
-            contain: 'outside', // Allows you to drag the image edges to the screen edges
+            minScale: 1, 
+            contain: 'outside',
+            startScale: 1, 
             cursor: 'move'
         });
 
         // 2. Add Click Events
         images.forEach(img => {
             img.addEventListener('click', () => {
-                // Clear the old image so we don't see a flash of the wrong photo
+                // 1. Reset everything first to avoid "ghost" images
                 zoomImg.src = "";
                 zoomImg.style.opacity = "0"; 
+                pzInstance.reset(); // Crucial: Reset zoom to 1 before showing
 
-                // Open Overlay
+                // 2. Open Overlay
                 overlay.style.display = 'block';
                 
-                // Set new Source
+                // 3. Set new Source
                 zoomImg.src = img.src;
                 
-                // WAIT for load before calculating dimensions
+                // 4. WAIT for load before calculating center
                 zoomImg.onload = () => {
-                    // Reset zoom to 1 (which matches CSS "fit to screen")
+                    // This forces the library to recalculate the "center" based on the new image size
                     pzInstance.reset(); 
-                    // Fade image in nicely
                     zoomImg.style.opacity = "1";
                 }
             });
         });
 
-        // 3. Enable Mouse Wheel
+        // Enable Mouse Wheel
         zoomImg.parentElement.addEventListener('wheel', pzInstance.zoomWithWheel);
 
-        // 4. Close Functions
+        // Close Functions
         function closeOverlay() {
             overlay.style.display = 'none';
             zoomImg.src = ""; 
+            pzInstance.reset(); // Reset on close so next time starts fresh
         }
 
         closeBtn.addEventListener('click', closeOverlay);
@@ -208,9 +221,7 @@
             if (e.key === "Escape") closeOverlay();
         });
         
-        // Close if clicking the black background (but not the image itself)
         overlay.addEventListener('click', (e) => {
-            // We check if the click target is the container or overlay, NOT the image
             if (e.target === overlay || e.target.id === 'zoom-image-container') {
                 closeOverlay();
             }
