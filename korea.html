@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Korea '25'</title>
+    <title>Korea '25</title>
     <link rel="stylesheet" href="style.css">
     
     <style>
@@ -20,7 +20,7 @@
             max-height: 95vh; 
             width: auto; 
             object-fit: contain;
-            cursor: zoom-in; /* Shows magnifying glass cursor */
+            cursor: zoom-in;
             transition: opacity 0.2s;
         }
 
@@ -37,16 +37,16 @@
 
         /* NEW LIGHTBOX VIEWER STYLES */
         #zoom-overlay {
-            display: none; /* Hidden by default */
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9); /* Dark background */
+            background: rgba(0, 0, 0, 0.95);
             z-index: 1000;
             overflow: hidden;
-            cursor: move; /* Shows 'move' cursor when open */
+            cursor: move;
         }
 
         #zoom-image-container {
@@ -58,9 +58,16 @@
         }
 
         #zoom-image {
-            max-width: 90%;
-            max-height: 90%;
-            /* Will be controlled by JS for zooming */
+            /* FIX 1: Prevent Stretching */
+            max-width: 95%;
+            max-height: 95%;
+            width: auto;
+            height: auto;
+            object-fit: contain; 
+            
+            /* FIX 2: Improve Performance (GPU Acceleration) */
+            will-change: transform; 
+            transform-origin: center center;
         }
 
         #close-btn {
@@ -73,6 +80,7 @@
             cursor: pointer;
             z-index: 1001;
             user-select: none;
+            text-shadow: 0px 0px 5px rgba(0,0,0,0.5);
         }
     </style>
 </head>
@@ -97,41 +105,41 @@
     </div>
 
     <div class="wide-image-container">
-        <img src="images/Gyeongbukgong-1.jpg" alt="Palace Guards" class="zoomable">
+        <img src="images/Gyeongbukgong-1.jpg" alt="Palace Guards" class="zoomable" loading="lazy">
         <div class="caption">Sets of 3 drumbeats signal the changing of the guard at Gyeongbukgong palace.</div>
     </div>
 
     <div class="wide-image-container">
-        <img src="images/Gyeongbukgong-2.jpg" alt="Palace Architecture" class="zoomable">
+        <img src="images/Gyeongbukgong-2.jpg" alt="Palace Architecture" class="zoomable" loading="lazy">
         <div class="caption">The palace is full of peaceful spaces no matter how busy it is.</div>
     </div>
     
     <div class="wide-image-container">
-        <img src="images/Wall-1.jpg" alt="Art Wall" class="zoomable">
+        <img src="images/Wall-1.jpg" alt="Art Wall" class="zoomable" loading="lazy">
     </div>
     
     <div class="wide-image-container">
-        <img src="images/Wall-2.jpg" alt="Art Wall Detail" class="zoomable">
+        <img src="images/Wall-2.jpg" alt="Art Wall Detail" class="zoomable" loading="lazy">
         <div class="caption">An art park at the bottom of Insadong culture street had mini walls designed by different artists.</div>
     </div>
     
     <div class="wide-image-container">
-        <img src="images/Bukhansan-1.jpg" alt="Mountain with two crows" class="zoomable">
+        <img src="images/Bukhansan-1.jpg" alt="Mountain with two crows" class="zoomable" loading="lazy">
         <div class="caption">View of Bukhansan peak on the way up.</div>
     </div>
 
     <div class="wide-image-container">
-        <img src="images/Bukhansan-2.jpg" alt="Black and white mountain with man on summit" class="zoomable">
+        <img src="images/Bukhansan-2.jpg" alt="Black and white mountain with man on summit" class="zoomable" loading="lazy">
         <div class="caption">Bukhansan peak with 2 crows hunting for snacks dropped by hikers.</div>
     </div>
 
     <div class="wide-image-container">
-        <img src="images/Jeju-2.jpg" alt="Jeju Coast Sunset" class="zoomable">
+        <img src="images/Jeju-2.jpg" alt="Jeju Coast Sunset" class="zoomable" loading="lazy">
         <div class="caption">Jeju's southern coast at sunset.</div>
     </div>
     
     <div class="wide-image-container">
-        <img src="images/Jeju-3.jpg" alt="Island view from coast" class="zoomable">
+        <img src="images/Jeju-3.jpg" alt="Island view from coast" class="zoomable" loading="lazy">
         <div class="caption">Small island with cool rock pillars from a rocky Jeju beach.</div>
     </div>
     
@@ -148,52 +156,53 @@
 
     <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
     <script>
-        // Select elements
         const overlay = document.getElementById('zoom-overlay');
         const zoomImg = document.getElementById('zoom-image');
         const closeBtn = document.getElementById('close-btn');
         const images = document.querySelectorAll('.zoomable');
         
-        let pzInstance = null; // Store the panzoom instance
+        let pzInstance = null; 
 
-        // 1. Initialize Panzoom on the overlay image (but don't enable it yet)
-        // We set maxScale to 10 so you can zoom in 10x deep!
+        // Initialize Panzoom
         pzInstance = Panzoom(zoomImg, {
             maxScale: 10,
             contain: 'outside',
-            cursor: 'move'
+            cursor: 'move',
+            // This prevents Panzoom from overriding the object-fit CSS
+            setTransform: (elem, { scale, x, y }) => {
+                pzInstance.setStyle('transform', `scale(${scale}) translate(${x}px, ${y}px)`)
+            }
         });
 
-        // 2. Add Click Events to all page images
+        // Add Click Events
         images.forEach(img => {
             img.addEventListener('click', () => {
-                // Set the overlay image source to the clicked image source
-                zoomImg.src = img.src;
-                // Show the overlay
+                // Important: Show overlay first so image has space to calculate dimensions
                 overlay.style.display = 'block';
-                // Reset zoom to normal before showing
-                pzInstance.reset();
+                
+                zoomImg.src = img.src;
+                
+                // Wait for the image to load slightly before resetting zoom to ensure no glitches
+                zoomImg.onload = () => {
+                   pzInstance.reset();
+                }
             });
         });
 
-        // 3. Enable Mouse Wheel Zooming
+        // Mouse Wheel Zooming
         zoomImg.parentElement.addEventListener('wheel', pzInstance.zoomWithWheel);
 
-        // 4. Close Overlay Function
         function closeOverlay() {
             overlay.style.display = 'none';
-            zoomImg.src = ""; // Clear src to save memory
+            zoomImg.src = ""; 
         }
 
-        // Close when clicking the "X"
         closeBtn.addEventListener('click', closeOverlay);
 
-        // Close when pressing "Escape" key
         document.addEventListener('keydown', (e) => {
             if (e.key === "Escape") closeOverlay();
         });
         
-        // Optional: Close if clicking the black background (but not if dragging the image)
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay || e.target.id === 'zoom-image-container') {
                 closeOverlay();
