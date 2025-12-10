@@ -16,10 +16,11 @@
 
         .wide-image-container img {
             max-width: 100%;
-            /* This limits the image height to 95% of the screen height */
             max-height: 95vh; 
             width: auto; 
             object-fit: contain;
+            /* This shows the user they can click */
+            cursor: zoom-in; 
         }
         
         .caption {
@@ -92,6 +93,15 @@
     <footer>
         <a href="index.html">Return Home</a>
     </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.6/dist/medium-zoom.min.js"></script>
+    <script>
+        // This finds all images inside .wide-image-container and makes them zoomable
+        mediumZoom('.wide-image-container img', {
+            margin: 24, /* Leaves a little space around the edge */
+            background: '#ffffff' /* The background color when zoomed (white) */
+        });
+    </script>
 
 </body>
 </html>
