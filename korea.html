@@ -7,7 +7,31 @@
     <link rel="stylesheet" href="style.css">
     
     <style>
-        /* MAIN PAGE STYLES - PRESERVED EXACTLY */
+        /* PAGE BACKGROUND & TEXT - MATCHING INDEX */
+        body {
+            background-color: #f4f4f4; /* Light Neutral Gray */
+            color: #333;
+            margin: 0;
+            /* Note: No global font-family set, so the Title remains Serif */
+        }
+
+        /* HEADER STYLES - MATCHING INDEX */
+        header {
+            padding: 20px; /* Exact padding match */
+            /* Text-align defaults to left, matching Index */
+        }
+        
+        h1 {
+            margin-top: 0; /* Ensures title sits at the top */
+        }
+
+        /* CONTENT TYPOGRAPHY */
+        /* Explicitly set sans-serif for content elements so they are readable */
+        h2, p, .caption, footer {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* MAIN PAGE STYLES */
         .wide-image-container {
             display: flex;
             flex-direction: column;
@@ -166,8 +190,6 @@
         const images = document.querySelectorAll('.zoomable');
         
         // INITIALIZE PANZOOM
-        // Key Fix: Removed "contain: 'outside'".
-        // This allows the Flexbox CSS to center the image naturally.
         const pzInstance = Panzoom(zoomImg, {
             maxScale: 10,
             minScale: 1, 
@@ -178,16 +200,9 @@
         // HANDLE CLICKS
         images.forEach(img => {
             img.addEventListener('click', () => {
-                // 1. Reset opacity so we don't see the jump
                 zoomImg.style.opacity = "0"; 
-                
-                // 2. Open Overlay
                 overlay.style.display = 'block';
-                
-                // 3. Set Source
                 zoomImg.src = img.src;
-                
-                // 4. Wait for image to load before resetting Panzoom
                 zoomImg.onload = () => {
                     pzInstance.reset();
                     zoomImg.style.opacity = "1";
@@ -196,7 +211,6 @@
         });
 
         // ENABLE MOUSE WHEEL
-        // We bind this to the container so scrolling anywhere works
         zoomContainer.addEventListener('wheel', pzInstance.zoomWithWheel);
 
         // CLOSE FUNCTIONS
@@ -213,7 +227,6 @@
         });
         
         overlay.addEventListener('click', (e) => {
-            // Close if clicking the black background or the container
             if (e.target === overlay || e.target === zoomContainer) {
                 closeOverlay();
             }
